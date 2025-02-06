@@ -1,0 +1,37 @@
+name: Verify Server
+
+on:
+  pull_request:
+    paths:
+      - 'Server/**'
+      - 'Server.Test/**'
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore dependencies for Server
+        run: dotnet restore ./Server/Server.csproj
+
+      - name: Build Server project
+        run: dotnet build ./Server/Server.csproj --configuration Release --no-restore
+
+      - name: Restore dependencies for Server.Test
+        run: dotnet restore ./Server.Test/Server.Test.csproj
+
+      - name: Build Server.Test project
+        run: dotnet build ./Server.Test/Server.Test.csproj --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test ./Server.Test/Server.Test.csproj --configuration Release --no-build --verbosity normal
